@@ -26,6 +26,6 @@ tqdm
 
 # Audio Post-processing
 pydub
-praat-parselmouth # For unvoiced segment removal
+# praat-parselmouth # For unvoiced segment removal - commented out due to ARM64 build issues
 librosa # for changes to sampling
 hf-transfer

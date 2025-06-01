@@ -82,15 +82,31 @@ def load_model() -> bool:
             f"Attempting to load model directly using from_pretrained (expected from Hugging Face repository: {model_repo_id_config} or library default)."
         )
         try:
+            # Monkey patch torch.load to handle CPU-only environments
+            original_torch_load = torch.load
+            if model_device == "cpu":
+                def patched_torch_load(f, map_location=None, pickle_module=None, **kwargs):
+                    if map_location is None:
+                        map_location = torch.device('cpu')
+                    return original_torch_load(f, map_location=map_location, pickle_module=pickle_module, **kwargs)
+                torch.load = patched_torch_load
+            
             # Directly use from_pretrained. This will utilize the standard Hugging Face cache.
             # The ChatterboxTTS.from_pretrained method handles downloading if the model is not in the cache.
             chatterbox_model = ChatterboxTTS.from_pretrained(device=model_device)
+            
+            # Restore original torch.load
+            if model_device == "cpu":
+                torch.load = original_torch_load
             # The actual repo ID used by from_pretrained is often internal to the library,
             # but logging the configured one provides user context.
             logger.info(
                 f"Successfully loaded TTS model using from_pretrained (expected from '{model_repo_id_config}' or library default)."
             )
         except Exception as e_hf:
+            # Restore original torch.load in case of exception
+            if model_device == "cpu" and 'original_torch_load' in locals():
+                torch.load = original_torch_load
             logger.error(
                 f"Failed to load model using from_pretrained (expected from '{model_repo_id_config}' or library default): {e_hf}",
                 exc_info=True,

@@ -22,13 +22,20 @@ WORKDIR /app
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
+
+# Install PyTorch with appropriate CUDA support
+# This will work on both GPU and CPU-only environments
+RUN pip3 install --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cu121 || \
+    pip3 install --no-cache-dir torch torchaudio
+
+# Install remaining requirements
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
 
 # Create required directories for the application
-RUN mkdir -p model_cache reference_audio outputs voices logs \
+RUN mkdir -p model_cache reference_audio outputs voices logs
 
 # Expose the port the application will run on (default from config, e.g., 8004)
 EXPOSE 8004
