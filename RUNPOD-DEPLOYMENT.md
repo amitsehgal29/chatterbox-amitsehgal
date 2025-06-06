@@ -1,8 +1,31 @@
 # RunPod Template Configuration for Chatterbox TTS Server
 
-## 🚀 RunPod Deployment Without Docker Hub
+## 🚀 Recommended RunPod Deployment
 
-Since uploading large Docker images can be challenging, use this approach instead:
+### **Quick Deploy Command (Recommended)**
+
+Use this optimized command in RunPod's "Docker Command" field for fastest deployment:
+
+```bash
+bash -c "export DEBIAN_FRONTEND=noninteractive && apt-get update -qq && apt-get install -y --no-install-recommends git libsndfile1 wget curl && apt-get install -y --no-install-recommends ffmpeg || echo 'FFmpeg install failed, continuing...' && cd /workspace && if [ ! -d 'chatterbox-amitsehgal' ]; then git clone https://github.com/amitsehgal29/chatterbox-amitsehgal.git; fi && cd chatterbox-amitsehgal && pip install --no-cache-dir -r requirements.txt && echo 'Starting Chatterbox TTS Server on port 8004...' && python3 server.py"
+```
+
+**Template Configuration:**
+- **Container Image:** `runpod/pytorch:2.1.0-py3.10-cuda12.1.1-devel-ubuntu22.04`
+- **Container Disk:** 20GB minimum
+- **Expose HTTP Ports:** `8004`
+- **Environment Variables:**
+  ```
+  PYTHONDONTWRITEBYTECODE=1
+  PYTHONUNBUFFERED=1
+  HF_HUB_ENABLE_HF_TRANSFER=1
+  NVIDIA_VISIBLE_DEVICES=all
+  NVIDIA_DRIVER_CAPABILITIES=compute,utility
+  ```
+
+## 🚀 Alternative RunPod Deployment Methods
+
+Since uploading large Docker images can be challenging, here are additional approaches:
 
 ### **Method 1: Use Pre-built PyTorch Container + Startup Script**
 
